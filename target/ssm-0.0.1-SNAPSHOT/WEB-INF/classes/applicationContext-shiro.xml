@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+	<!-- 加载shiro属性文件 -->
+	<context:property-placeholder location="classpath:shiro.properties" ignore-unresolvable="true"/>	
+
+	<!-- Shiro Filter 拦截器相关配置 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<!-- securityManager -->
+		<property name="securityManager" ref="securityManager" />
+		<!-- 登录路径,在value中配置无需登录 -->
+		<property name="loginUrl" value="/" />
+		<!-- 登录成功页面 -->
+		<property name="successUrl" value="/main" />
+		<!-- 用户访问无权限的链接时跳转此页面 -->
+		<property name="unauthorizedUrl" value="/" />
+		<!-- 过滤链定义 -->
+		<property name="filterChainDefinitions">
+			<value>
+				/=anon
+				/user/login=anon
+				/user/regist=anon
+				/regist=anon
+				/forgetPass=anon
+				/confirmForgetPass=anon
+				/styles/**=anon
+				/pages/**=anon
+				/images/**=anon
+				/scripts/**=anon
+				/upload/**=anon
+				<!-- /userList=roles[admin] -->
+				/userList=authc,perms[/userList]
+				/toDeleteUser=authc,perms[/toDeleteUser]
+				/** = authc
+			</value>
+		</property>
+	</bean>
+	
+	<!-- 自定义realm,重写身份认证逻辑 -->
+	<bean id="customSaltRealm" class="com.zhjg.ssm.realm.CustomSaltRealm">
+		<property name="permissionsLookupEnabled" value="true" />
+		<!-- md5散列加密方式验证用户输入token和系统加密过的token是否一致 -->
+		<property name="credentialsMatcher">
+			<bean class="org.apache.shiro.authc.credential.Md5CredentialsMatcher"/>
+		</property>
+	</bean>
+
+	<!-- securityManager -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="customSaltRealm" />
+	</bean>
+
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+	
+	<!-- 在service层开启shiro注解支持 -->    
+	<bean id="serviceAdvisorAutoProxyCreator" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"  
+          depends-on="lifecycleBeanPostProcessor"/>  
+    <bean id="serviceAuthorizationAttributeSourceAdvisor"  class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">  
+        <property name="securityManager" ref="securityManager"/>  
+    </bean>
+
+</beans>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE configuration  
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">  
+<configuration>  
+	<!-- mybatis单独配置start -->
+    <!-- 对事务的管理和连接池的配置 -->
+    <!--   
+    <environments default="development">  
+        <environment id="development">  
+            <transactionManager type="JDBC" />  
+            <dataSource type="POOLED">  
+                <property name="driver" value="oracle.jdbc.driver.OracleDriver" />  
+                <property name="url" value="jdbc:oracle:thin:@localhost:1521:orcl" />  
+                <property name="username" value="ibatis" />  
+                <property name="password" value="ibatis" />  
+            </dataSource>  
+        </environment>  
+    </environments>  
+     -->      
+    <!-- mapping 文件路径配置 -->
+    <!-- 
+    <mappers>  
+        <mapper resource="com/zhjg/ssm/mapper/SysUserMapper.xml" />  
+    </mappers>
+     -->
+    <!-- mybatis单独配置end -->  
+    
+    
+    <!-- 与spring整合后，映射文件由spring组件扫描器负责扫描和加载，数据库连接池由第三方的组件加载如druid,c3po...,所以mybatis配置文件什么都不需要配置 -->
+    
+    
+</configuration>

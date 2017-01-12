@@ -1,0 +1,120 @@
+第一种：cronTrigger+quartzJobDetail(执行后者的executeInternal()方法),cronTrigger支持定时表达式，可以定点执行和间隔执行
+
+	<!-- spring定时任务，与redis的list结构结合用于异步处理请求  -->
+	
+    <bean name="emailJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<!-- Job class must implement the Job interface. -->
+        <property name="jobClass" value="com.zhjg.ssm.job.EmailJob" />  
+        <property name="jobDataAsMap">  
+            <map>  
+                <entry key="timeout" value="5" />  
+            </map>  
+        </property>  
+    </bean>
+    
+    <bean id="cronTrigger"  
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+        <property name="jobDetail" ref="emailJob" />  
+        <!-- run every morning at 6 AM -->  
+        <!-- <property name="cronExpression" value="0 0 6 * * ?" /> -->  
+        <!-- <property name="cronExpression" value="0 0/1 * * * ?" /> --> <!-- 每分钟 -->  
+        <property name="cronExpression" value="0/2 * * * * ?" /> <!-- 每秒 -->  
+    </bean>
+	
+	<!-- 总调度用于启动Spring定时器 -->  
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>  
+            	<!-- 定时任务开关 -->
+                <ref bean="cronTrigger" />  
+                <!-- <ref bean="simpleTrigger" /> -->  
+            </list>  
+        </property>  
+    </bean>
+	
+	
+第二种：cronTrigger+methodInvokingJobDetail(执行后者指定任务对象的指定任务方法)
+	<!-- spring定时任务，与redis的list结构结合用于异步处理请求  -->
+	
+	<bean id="orderAsyncResolveJob" class="com.zhjg.ssm.job.OrderAsyncResolveJob" />
+	 
+    <bean id="jobDetail"  
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject" ref="orderAsyncResolveJob" />  
+        <property name="targetMethod" value="dealOrder" />  
+        <property name="concurrent" value="false" /> 
+    </bean>
+	
+    <bean id="cronTrigger"  
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+        <property name="jobDetail" ref="jobDetail" />  
+        <!-- run every morning at 6 AM -->  
+        <!-- <property name="cronExpression" value="0 0 6 * * ?" /> -->  
+        <!-- <property name="cronExpression" value="0 0/1 * * * ?" /> --> <!-- 每分钟 -->  
+        <property name="cronExpression" value="0/2 * * * * ?" /> <!-- 每秒 -->  
+    </bean>
+	
+	<!-- 总调度用于启动Spring定时器 -->  
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>  
+            	<!-- 定时任务开关 -->
+                <ref bean="cronTrigger" />  
+                <!-- <ref bean="simpleTrigger" /> -->  
+            </list>  
+        </property>  
+    </bean>
+	
+第三种：simpleTrigger+methodInvokingJobDetail(执行后者指定任务对象的指定任务方法)，simpleTrigger支持间隔执行定时任务
+<!-- spring定时任务，与redis的list结构结合用于异步处理请求  -->
+	
+	<bean id="orderAsyncResolveJob" class="com.zhjg.ssm.job.OrderAsyncResolveJob" />
+	 
+    <bean id="jobDetail"  
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject" ref="orderAsyncResolveJob" />  
+        <property name="targetMethod" value="dealOrder" />  
+        <property name="concurrent" value="false" /> 
+    </bean>
+
+	<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail" ref="jobDetail"></property>
+		<property name="startDelay" value="1000"></property>
+		<property name="repeatInterval" value="1000"></property>
+	</bean>	
+	
+	<!-- 总调度用于启动Spring定时器 -->  
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>  
+            	<!-- 定时任务开关 -->
+                <!-- <ref bean="cronTrigger" /> -->  
+                <ref bean="simpleTrigger" />  
+            </list>  
+        </property>  
+    </bean>
+	
+第四种：simpleTrigger+quartzJobDetail(执行后者的executeInternal()方法)
+	<!-- spring定时任务，与redis的list结构结合用于异步处理请求  -->
+	
+	<bean id="jobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<!-- Job class must implement the Job interface. -->
+		<property name="jobClass" value="com.zhjg.ssm.job.EmailJob" />
+	</bean>
+	
+	<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail" ref="jobDetail" />
+		<property name="startDelay" value="1000"/>
+		<property name="repeatInterval" value="1000"/>
+	</bean>
+	
+	<!-- 总调度用于启动Spring定时器 -->  
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>  
+            	<!-- 定时任务开关 -->
+                <!-- <ref bean="cronTrigger" /> -->  
+                <ref bean="simpleTrigger" />  
+            </list>  
+        </property>  
+    </bean>

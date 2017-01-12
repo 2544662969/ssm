@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- <bean id="commPropertiesConfiguration" class="com.zhjg.ssm.util.CommPropertiesConfiguration"></bean> -->
+
+	<!-- 当属性文件有多个时,可以通过locations配置 -->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:db.properties</value>
+				<value>classpath:redis.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- 单个属性文件加载 -->
+	<!-- <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>classpath:db.properties</value>
+		</property>
+	</bean> -->
+	
+	<!-- <context:property-placeholder location="classpath:db.properties" ignore-unresolvable="true"/> -->
+	
+	<!-- redis连接池 -->  
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<!-- 最大空闲数 -->
+        <property name="maxIdle" value="${redis.pool.maxIdle}"/>
+        <!-- 最大连接数 -->
+        <property name="maxTotal" value="${redis.pool.maxActive}"/>
+        <!-- 最长等待时间 -->
+        <property name="maxWaitMillis" value="${redis.pool.maxWait}"/>
+        <!-- 使用连接时，检测连接是否成功 -->
+        <!-- <property name="testOnBorrow" value="${redis.pool.testOnBorrow}"/> -->
+        <!-- 返回连接时，检测连接是否成功 -->
+        <!-- <property name="testOnReturn" value="${redis.pool.testOnReturn}"/> -->
+	</bean>
+    <!-- redis连接工厂 -->  
+    <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">  
+        <!-- 主机ip -->
+        <property name="hostName" value="${redis.addr}"></property>
+        <!-- 端口号 -->  
+        <property name="port" value="${redis.port}"></property>
+        <!-- 访问密码 -->  
+        <property name="password" value="${redis.auth}"></property>
+        <!-- 注入redis连接池 --> 
+        <property name="poolConfig" ref="jedisPoolConfig"></property>  
+    </bean>  
+    <!-- redis操作模板，这里采用尽量面向对象的模板 -->  
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">  
+        <property name="connectionFactory" ref="connectionFactory" />  
+    	<!--如果不配置Serializer，那么存储的时候只能使用String，如果用对象类型存储，那么会提示错误 can't cast to String！！！-->  
+        <property name="keySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />  
+        </property>  
+        <property name="valueSerializer">
+            <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />  
+        </property>
+    </bean>
+    
+    <!-- redis模版类 -->
+    <bean id="myRedisTemplate" class="com.zhjg.ssm.template.JedisCacheTemplate">
+    	<property name="jedis">
+    		<bean class="redis.clients.jedis.Jedis">
+    			<constructor-arg name="host" value="localhost" />
+    			<constructor-arg name="port" value="6379" />
+    		</bean>
+    	</property>
+    </bean> 
+
+	<!-- 阿里 druid数据库连接池:有这段配置已经可以使用连接池 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close"> 
+	    <!-- 数据源驱动类可不写，Druid默认会自动根据URL识别DriverClass -->
+	    <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+	    
+		<!-- 基本属性 url、user、password -->
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${jdbc.pool.init}" />
+		<property name="minIdle" value="${jdbc.pool.minIdle}" /> 
+		<property name="maxActive" value="${jdbc.pool.maxActive}" />
+		
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="60000" />
+		
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		
+		<!-- 配置监控统计拦截的filters -->
+	    <property name="filters" value="stat" /> 
+	</bean>
+
+	<!-- 创建SqlSessionFactory，同时指定数据源 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- 指定sqlMapConfig配置文件，订制的environment在spring容器中不在生效 -->
+		<property name="configLocation" value="classpath:sqlMapConfig.xml" />
+		<!-- 当配置文件在WEB-INF下时 -->
+		<!-- <property name="configLocation" value="/WEB-INF/config/sqlMapConfig.xml" /> -->
+		<!-- 指定映射文件 -->
+		<property name="mapperLocations" value="classpath:com/zhjg/mybatis/mapper/*.xml" />
+		<!-- 配置分页插件 -->
+	</bean>
+
+	<!-- 扫描并加载mapper -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.zhjg.ssm.mapper" />
+		<!-- 指定sqlSessionFactory，当只有一个时可省 -->
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+
+	<mvc:annotation-driven />
+
+</beans>

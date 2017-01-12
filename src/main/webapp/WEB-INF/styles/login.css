@@ -1,0 +1,47 @@
+.login {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    background-color: #000000;
+    background-color: rgba(0, 0, 0, .5);
+    z-index: 11; }
+.login .container {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    margin: auto;
+    width: 500px;
+    height: 280px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 2px 1px rgba(0, 0, 0, .12); }
+.login .container form {
+    width: 330px;
+    padding: 20px;
+    margin: 20px auto; }
+.login .container h2 {
+    margin-bottom: 10px;
+    font-size: 18px; }
+.login .container .form-control {
+    padding: 21px 10px; }
+.login .container input[type="text"] {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px; }
+.login .container input[type="password"] {
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+    border-top: 0px; }
+.login .container .btn {
+    margin-top: 10px;
+    width: 100%;
+    height: 46px;
+    font-size: 18px; }
+.login .container p {
+    margin-top: 10px;
+    font-size: 12px; }
+
+/*# sourceMappingURL=../map/login.css.map */

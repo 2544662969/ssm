@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zhjg.ssm.mapper.SysRoleMapper" >
+  <resultMap id="sysRoleResultMap" type="com.zhjg.ssm.pojo.SysRole" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="rolename" property="roleName" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+  </resultMap>
+  <!-- 所有的角色 -->
+  <select id="getAll" resultMap="sysRoleResultMap">
+  	select * from sys_role;
+  </select>
+  <!-- 根据用户名获取角色，shiro权限验证时使用，自定义realm中 -->
+  <select id="getRoleNamesByLoginname" resultType="string" parameterType="string">
+  	select r.rolename from sys_user u, sys_user_role ur, sys_role r
+		where u.id = ur.user_id and ur.role_id = r.id
+		  and u.loginname = #{loginname};
+  </select>
+  <!-- 添加角色 -->
+  <insert id="addSysRole">
+  	insert into sys_role (id, rolename, description) values (uuid(), #{roleName}, #{description});
+  </insert>
+  <!-- 查询用已经具有的角色 -->
+  <select id="getSysRolesByUserId" resultMap="sysRoleResultMap">
+  	select * from sys_role where id in (select role_id from sys_user_role where user_id = #{userId});
+  </select>
+  <!-- 查询用户没有的角色 -->
+  <select id="getOtherSysRolesByUserId" resultMap="sysRoleResultMap">
+  	select * from sys_role where id not in (select role_id from sys_user_role where user_id = #{userId});
+  </select>
+  
+  <!-- 多参数批量处理，在mapper接口中通过@param来指定映射文件中使用的参数，使用对应的参数来访问对应的值 -->
+  <insert id="addUserRoles">
+  	insert into sys_user_role (user_id, role_id) values
+  	<foreach collection="addRoleIds" item="item" separator=",">
+  		(#{userId}, #{item})
+  	</foreach>
+  </insert>
+  
+  <delete id="deleteUserRoles">
+  	delete from sys_user_role where user_id = #{userId} and role_id in
+  	<foreach collection="removeRoleIds" item="item" index="index" open="(" separator="," close=")">
+  		#{item}
+  	</foreach>
+  </delete>
+  
+</mapper>

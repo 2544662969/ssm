@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- 当只有一个spring配置文件时，可以通过下面的写法根据注解类型扫描，也可以排除注解类型的类 -->
+	<context:component-scan base-package="com.zhjg.ssm">
+		<!-- 扫描com.zhjg.ssm包下加了@Service注解的类 -->
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+		<!-- 扫描com.zhjg.ssm报下加了@Component注解的类，例如：Dao的实现类 -->
+		<!-- <context:include-filter type="annotation" expression="org.springframework.stereotype.Component"/> -->
+	</context:component-scan>
+	
+	<mvc:annotation-driven />
+	
+	<!-- spring定时任务，与redis的list结构结合用于异步处理请求  -->
+	
+	<!-- 任务对象 -->
+	<bean id="orderAsyncResolveJob" class="com.zhjg.ssm.job.OrderAsyncResolveJob" />
+	 
+	<!-- 任务详情 -->
+    <bean id="jobDetail"  
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject" ref="orderAsyncResolveJob" />  
+        <property name="targetMethod" value="dealOrder" />  
+        <property name="concurrent" value="false" /> 
+    </bean>
+	
+	<!-- 任务定时器 -->
+	<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail" ref="jobDetail"></property>
+		<property name="startDelay" value="1000"></property>
+		<property name="repeatInterval" value="1000"></property>
+	</bean>	
+	
+	<!-- 总调度用于启动Spring定时器 -->  
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>  
+            	<!-- 定时任务开关 -->
+                <!-- <ref bean="cronTrigger" /> -->  
+                <ref bean="simpleTrigger" />  
+            </list>  
+        </property>  
+    </bean>
+	
+	
+	
+</beans>

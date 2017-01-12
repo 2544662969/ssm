@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zhjg.ssm.mapper.SysPermissionMapper" >
+  <resultMap id="sysPermissionResultMap" type="com.zhjg.ssm.pojo.SysPermission" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="parent_id" property="parentId" jdbcType="VARCHAR" />
+    <result column="is_delete" property="isDelete" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+  </resultMap>
+  
+  <select id="getAll" resultMap="sysPermissionResultMap">
+  	select * from sys_permission;
+  </select>
+  
+  <select id="getPermissionsByRoleNames" resultType="string" parameterType="collection">
+  	select code from sys_role r, sys_role_permission rp, sys_permission p
+		where r.id = rp.role_id and rp.permission_id = p.id
+		  and rolename in
+	<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+		#{item}
+	</foreach>
+  </select>
+  
+</mapper>

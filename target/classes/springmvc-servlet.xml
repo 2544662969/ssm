@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/aop   
+              http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+    
+    <!-- springmvc通用页面跳转action如/page/pname在controller中将pname作为路径变量，接到该参数直接返回，用pname作为页面的名字即可 -->
+    
+    <!-- 在controller层开启shiro注解支持 -->    
+	<bean id="controllerAdvisorAutoProxyCreator" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"  
+          depends-on="lifecycleBeanPostProcessor"/>  
+    <bean id="controllerAuthorizationAttributeSourceAdvisor"  class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">  
+        <property name="securityManager" ref="securityManager"/>  
+    </bean>
+    
+    <!-- controller层捕获到shiro异常的处理 -->
+    <bean  
+	    class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">  
+	    <property name="exceptionMappings">  
+	        <props>
+	        	<!-- 未授权 -->
+	            <prop key="org.apache.shiro.authz.UnauthorizedException">
+	                /denied
+	            </prop>
+	            <!-- 未认证 -->
+	            <prop key="org.apache.shiro.authz.UnauthenticatedException">
+	                /index
+	            </prop>  
+	        </props>  
+	    </property>  
+	</bean>
+	
+	<!-- 解决springmvc将controller返回结果作为请求再次拦截 -->
+	<mvc:default-servlet-handler/>
+
+	<!-- 扫描后端控制器 -->
+	<context:component-scan base-package="com.zhjg.ssm.controller" />
+	
+	<!-- 解决@ResponseBody中文乱码 -->
+    <!-- <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8" />
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven> -->
+    
+	<!-- 可以指定扫描的类型，也可以指定不扫描的类型 -->
+	<!-- <context:component-scan
+        base-package="com.zhjg.ssm.service" use-default-filters="false">
+        <context:exclude-filter type ="annotation" expression= "org.springframework.stereotype.Service" />
+    </context:component-scan> -->
+
+	<!-- <mvc:annotation-driven /> --><!-- 依赖hibernate-validator.jar -->
+	<!-- 静态资源映射 -->
+	<mvc:resources location="/WEB-INF/scripts/" mapping="/scripts/**"></mvc:resources>
+	<mvc:resources location="/WEB-INF/styles/" mapping="/styles/**"></mvc:resources>
+	<mvc:resources location="/WEB-INF/images/" mapping="/images/**"></mvc:resources>
+
+	<!-- 覆盖默认的视图解析器配置，添加逻辑视图的前缀和后缀 -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/pages/" />
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+	
+</beans>
