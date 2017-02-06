@@ -38,6 +38,7 @@
 				/pages/**=anon
 				/images/**=anon
 				/scripts/**=anon
+				/services/**=anon
 				/upload/**=anon
 				<!-- /userList=roles[admin] -->
 				/userList=authc,perms[/userList]

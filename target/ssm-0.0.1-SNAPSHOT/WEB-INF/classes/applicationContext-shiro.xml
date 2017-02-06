@@ -33,11 +33,12 @@
 				/user/regist=anon
 				/regist=anon
 				/forgetPass=anon
-				/confirmForgetPass=anon
+				/submitForgetPass=anon
 				/styles/**=anon
 				/pages/**=anon
 				/images/**=anon
 				/scripts/**=anon
+				/services/**=anon
 				/upload/**=anon
 				<!-- /userList=roles[admin] -->
 				/userList=authc,perms[/userList]
@@ -50,7 +51,7 @@
 	<!-- 自定义realm,重写身份认证逻辑 -->
 	<bean id="customSaltRealm" class="com.zhjg.ssm.realm.CustomSaltRealm">
 		<property name="permissionsLookupEnabled" value="true" />
-		<!-- md5散列加密方式验证用户输入token和系统加密过的token是否一致 -->
+		<!-- md5散列加密方式验证用户输入token和系统加密过的AuthencationInfo是否一致 -->
 		<property name="credentialsMatcher">
 			<bean class="org.apache.shiro.authc.credential.Md5CredentialsMatcher"/>
 		</property>

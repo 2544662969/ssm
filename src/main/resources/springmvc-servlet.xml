@@ -67,6 +67,8 @@
 	<mvc:resources location="/WEB-INF/scripts/" mapping="/scripts/**"></mvc:resources>
 	<mvc:resources location="/WEB-INF/styles/" mapping="/styles/**"></mvc:resources>
 	<mvc:resources location="/WEB-INF/images/" mapping="/images/**"></mvc:resources>
+	<!-- 保证springmvc不拦截axis接口的调用,如果在shiro环境下还要配置该类型url不需要登录,否则会被shiro拦截从而返回到登录页面 -->
+	<mvc:resources location="/services/" mapping="/services/**"></mvc:resources>
 
 	<!-- 覆盖默认的视图解析器配置，添加逻辑视图的前缀和后缀 -->
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">

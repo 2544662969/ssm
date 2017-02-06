@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- 如下配置spring会在容器启动后自动加载并发布服务 -->
+	<!-- rmi仅限两个java工程进行远程方法调用，如果要跨语言应该用webservice实现 -->
+	<bean id="bankCardBalanceServiceExporter" class="org.springframework.remoting.rmi.RmiServiceExporter">  
+        <property name="serviceName" value="BankCardBalanceService" />  
+        <property name="service" ref="bankCardBalanceService" />  
+        <property name="serviceInterface"  
+            value="com.zhjg.ssm.rmi.BankCardBalanceService" />  
+        <property name="registryPort" value="8090" />  
+        <property name="servicePort" value="8088" />  
+    </bean>  
+    <bean id="bankCardBalanceService" class="com.zhjg.ssm.rmi.impl.BankCardBalanceServiceImpl" />
+
+</beans>

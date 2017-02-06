@@ -1,1 +1,0 @@
-springmvc+spring+mybatis+redis+shiro+mysql+jstl

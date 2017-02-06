@@ -15,6 +15,8 @@
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
     
+    <!-- springmvc通用页面跳转action如/page/pname在controller中将pname作为路径变量，接到该参数直接返回，用pname作为页面的名字即可 -->
+    
     <!-- 在controller层开启shiro注解支持 -->    
 	<bean id="controllerAdvisorAutoProxyCreator" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"  
           depends-on="lifecycleBeanPostProcessor"/>  
@@ -38,6 +40,9 @@
 	        </props>  
 	    </property>  
 	</bean>
+	
+	<!-- 解决springmvc将controller返回结果作为请求再次拦截 -->
+	<mvc:default-servlet-handler/>
 
 	<!-- 扫描后端控制器 -->
 	<context:component-scan base-package="com.zhjg.ssm.controller" />
@@ -62,6 +67,8 @@
 	<mvc:resources location="/WEB-INF/scripts/" mapping="/scripts/**"></mvc:resources>
 	<mvc:resources location="/WEB-INF/styles/" mapping="/styles/**"></mvc:resources>
 	<mvc:resources location="/WEB-INF/images/" mapping="/images/**"></mvc:resources>
+	<!-- 保证springmvc不拦截axis接口的调用,如果在shiro环境下还要配置该类型url不需要登录,否则会被shiro拦截从而返回到登录页面 -->
+	<mvc:resources location="/services/" mapping="/services/**"></mvc:resources>
 
 	<!-- 覆盖默认的视图解析器配置，添加逻辑视图的前缀和后缀 -->
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
